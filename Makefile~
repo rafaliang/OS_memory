@@ -1,0 +1,4 @@
+ll:
+	g++ -pthread -std=c++11 accessTime.cpp utility.h -o accessTime
+clean:
+	rm -rf *o accessTime

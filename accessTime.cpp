@@ -3,11 +3,12 @@
 double getAccessTime(int arraySize, int arrayStride){
 	int num = arraySize/4;
 	int* arr = new int[num];
+	//int* arr=(int*)malloc(arraySize);
 	int i,j=0;
 	for (i=0;i<num;++i){
-		arr[i]=j;
-		j+=arrayStride;
+		j=i+arrayStride;
 		if (j>=num) j%=num;
+		arr[i]=j;
 	}
 
 	int idx=0;
@@ -20,6 +21,7 @@ double getAccessTime(int arraySize, int arrayStride){
 		idx = arr[idx];
 	}
 	end=rdtscp();
+	delete[] arr;
 	return (end-start)*1.0/num;
 }
 
@@ -51,9 +53,10 @@ int main(){
 	}
 	*/
 
-	int arraySize = 256;     //in B
-	int arrayStride = 32;
-	int outerLoop = 25;
+	int arraySize = 32;     //in B
+	int arrayStride = 1024;
+	cout << "stride: " << arrayStride << endl;
+	int outerLoop = 24;
 	vector<double> res;
 
 	for (int i=0;i<outerLoop;++i){
@@ -62,5 +65,11 @@ int main(){
 		cout << i << "\t" << time << endl;
 		arraySize*=2;
 	}
+	/*
+	long long start=rdtsc();
+	sleep(10);
+	long long end=rdtscp();
+	cout << "test cpufreq: " << end-start<<endl;
+	*/
 	return 0;
 }
