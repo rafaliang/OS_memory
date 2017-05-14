@@ -11,17 +11,19 @@
 #include <pthread.h> 
 #include <x86intrin.h>
 #include <sys/syscall.h>
+#include <typeinfo> 
 
 
 using namespace std;
 
 struct node{
 	node* next;
-	int* lst;
-	node(int len){
-		lst = new int[len];
+	//unsigned int num;
+	node(){
 		next = NULL;
+		//num=d;
 	}
+	
 };
 
 static inline uint64_t rdtsc(){

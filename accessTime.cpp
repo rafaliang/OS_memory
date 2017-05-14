@@ -1,75 +1,73 @@
 #include "utility.h"
 
-double getAccessTime(int arraySize, int arrayStride){
-	int num = arraySize/4;
-	int* arr = new int[num];
+double getAccessTime(unsigned long long arraySize, unsigned long long arrayStride){
+	unsigned long long num= arraySize/sizeof(unsigned long long);
+	unsigned long long* arr = new unsigned long long[num];
+	unsigned long long steps = 1024*1024*1024;
 	//int* arr=(int*)malloc(arraySize);
-	int i,j=0;
+	arrayStride/=sizeof(unsigned long long);
+	unsigned long long i;
 	for (i=0;i<num;++i){
-		j=i+arrayStride;
-		if (j>=num) j%=num;
-		arr[i]=j;
+		arr[i]=(i+arrayStride)%num;
 	}
 
-	int idx=0;
+	unsigned long long idx=0;
 	uint64_t start,end;
 	i=0;
 	rdtsc();
 	end=rdtscp();
 	start=rdtsc();
-	for (;i<num;++i){
+	for (;i<steps;++i){
 		idx = arr[idx];
 	}
 	end=rdtscp();
 	delete[] arr;
-	return (end-start)*1.0/num;
+	return (end-start)*1.0/steps;
+}
+
+double getAccessTime2(unsigned int arraySize, unsigned int arrayStride){
+	unsigned int num = arraySize/sizeof(node);
+	arrayStride /= sizeof(node);
+	node** arr = new node*[num];
+	unsigned int steps = 1024*1024*32;
+	//int* arr=(int*)malloc(arraySize);
+	//node** arr = (node**)malloc(arraySize);
+	unsigned int i;
+	for (i=0;i<num;++i){
+		arr[i]=new node();
+	}
+	for (i=0;i<num;++i){
+		arr[i]->next=arr[(i+arrayStride)%num];
+	}
+	node* n=arr[0];
+	uint64_t start,end;
+	i=0;
+	rdtsc();
+	end=rdtscp();
+	start=rdtsc();
+	for (;i<steps;++i){
+		n = n->next;
+	}
+	end=rdtscp();
+	delete[] arr;
+	return (end-start)*1.0/steps;
 }
 
 int main(){
-	/*
-	int innerLoop = 10000;  // innerloop
-	int len = 1024;       // number of ints
-	int outerLoop = 50;
-	vector<double> res;
-
-	for (int i=0;i<outerLoop;++i){
-		node* p = new node(len);
-		node* head = p;
-		int j;
-		uint64_t start,end;
-		for (j=0;j<innerLoop;++j){
-			node* q = new node(len);
-			p->next = q;
-			p = p->next;
-		}
-		start = rdtsc();
-		p = head;
-		while(p->next) p=p->next;
-		end = rdtscp();
-		res.push_back((end-start)*1.0/innerLoop);
-		cout << (end-start)*1.0/innerLoop << endl;
-		len*=2;
-
-	}
-	*/
-
-	int arraySize = 32;     //in B
-	int arrayStride = 1024;
+	int initialSize = 8;
+	unsigned int arrayStride = 128;
+	unsigned int arraySize = 1<<initialSize;     
 	cout << "stride: " << arrayStride << endl;
-	int outerLoop = 24;
+	cout << "initial arraysize: "<<arraySize<<endl;
+	int outerLoop = 30-initialSize;
 	vector<double> res;
 
 	for (int i=0;i<outerLoop;++i){
 		double time=getAccessTime(arraySize,arrayStride);
 		res.push_back(time);
-		cout << i << "\t" << time << endl;
+		cout << i+initialSize << "\t" << time << endl;
 		arraySize*=2;
 	}
-	/*
-	long long start=rdtsc();
-	sleep(10);
-	long long end=rdtscp();
-	cout << "test cpufreq: " << end-start<<endl;
-	*/
+	
 	return 0;
 }
